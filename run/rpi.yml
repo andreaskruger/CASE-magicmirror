@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  magicmirror:
+    container_name: mm
+    image: karsten13/magicmirror:latest
+    volumes:
+      - ../mounts/config:/opt/magic_mirror/config
+      - ../mounts/modules:/opt/magic_mirror/modules
+      - ../mounts/css:/opt/magic_mirror/css
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /opt/vc:/opt/vc/:ro
+      - /usr/bin/vcgencmd:/usr/bin/vcgencmd
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+    devices:
+      - /dev/vchiq
+    environment:
+      LD_LIBRARY_PATH: /opt/vc/lib
+      DISPLAY: unix:0.0
+    network_mode: host
+    shm_size: "128mb"
+    restart: unless-stopped
+    command:
+      - npm
+      - run
+      - start

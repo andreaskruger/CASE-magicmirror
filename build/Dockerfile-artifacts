@@ -1,0 +1,64 @@
+ARG buildarch
+ARG NODE_VERSION
+ARG DEBIAN_VERSION
+FROM registry.gitlab.com/khassel/container/node-prune:latest as prune
+FROM ${buildarch}node:${NODE_VERSION}-${DEBIAN_VERSION}-slim as builder
+
+USER root
+
+WORKDIR /opt/magic_mirror
+
+COPY --from=prune /node-prune /usr/local/bin/node-prune
+COPY build_info.sh /tmp
+
+RUN set -e; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get -qy --no-install-recommends install git ca-certificates; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*; \
+    chown -R node:node . /tmp/build_info.sh; \
+    chmod +x /tmp/build_info.sh;
+
+USER node
+
+ARG GIT_INFO
+ARG BuildRef
+ARG GitRepo
+ARG buildarch
+ARG debug
+RUN set -e; \
+    node -v; \
+    echo BuildRef="${BuildRef}"; \
+    echo GitRepo="${GitRepo}"; \
+    git clone --depth 1 -b "${BuildRef}" --single-branch "${GitRepo}" .; \
+    git log -1; \
+    if [ -z "${debug}" ]; then \
+      npmargs="--omit=dev"; \
+      [ -z "${buildarch}" ] && npmargs="${npmargs} --omit=optional"; \
+    fi; \
+    if [ ! $(echo "${BuildRef}" | grep -E "^v[0-9]+.[0-9]+.[0-9]+$") ]; then \
+      # if not mm-version then delete package-lock.json to get newest dependencies
+      rm -f package-lock.json; \
+    fi; \
+    # special handling for using electron >= v16
+    sed -i 's|const app = electron.app;|const app = electron.app;\napp.disableHardwareAcceleration();|g' js/electron.js; \
+    npm install ${npmargs}; \
+    cat package.json; \
+    npm cache clean -f; \
+    rm -rf /home/node/.cache; \
+    sed -i "s:address\: \"localhost\":address\: \"0.0.0.0\":" config/config.js.sample; \
+    sed -i "s:ipWhitelist\: \[.*\],:ipWhitelist\: \[\],:" config/config.js.sample; \
+    mkdir mount_ori; \
+    mv modules mount_ori/; \
+    mv config mount_ori/; \
+    mv css mount_ori/; \
+    # remove not needed node_modules stuff
+    [ -z "${debug}" ] && node-prune || echo "no node-prune"; \
+    cp /tmp/build_info.sh .; \
+    ./build_info.sh "Artifacts" "$GIT_INFO"; \
+    rm -f build_info.sh;
+
+FROM scratch
+LABEL maintainer="Karsten Hassel"
+
+COPY --from=builder /opt/magic_mirror /opt/magic_mirror

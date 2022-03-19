@@ -1,0 +1,11 @@
+main:
+  - title: "Installation"
+    url: /installation/
+  - title: "Configuration"
+    url: /configuration/
+  - title: "Docker Images"
+    url: /images/
+  - title: "FAQ"
+    url: /faq/
+  - title: "Pi Related Modules"
+    url: /pi-modules/

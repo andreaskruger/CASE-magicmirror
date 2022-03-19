@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  magicmirror:
+    container_name: mm
+    image: karsten13/magicmirror:latest
+    volumes:
+      - ../mounts/config:/opt/magic_mirror/config
+      - ../mounts/modules:/opt/magic_mirror/modules
+      - ../mounts/css:/opt/magic_mirror/css
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /opt/vc:/opt/vc/:ro
+      - /usr/bin/vcgencmd:/usr/bin/vcgencmd
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+    devices:
+      - /dev/vchiq
+    environment:
+      LD_LIBRARY_PATH: /opt/vc/lib
+      DISPLAY: unix:0.0
+    network_mode: host
+    shm_size: "128mb"
+    restart: unless-stopped
+    command:
+      - npm
+      - run
+      - start
+
+  mmpm:
+    container_name: mmpm
+    image: karsten13/mmpm:latest
+    depends_on:
+      - magicmirror
+    ports:
+      - "7890:7890"
+      - "7892:7892"
+    volumes:
+      - ../mounts/modules:/home/node/MagicMirror/modules
+      - ../mounts/config:/home/node/MagicMirror/config
+      - ../mounts/css:/home/node/MagicMirror/css
+      - ../mounts/mmpm-config:/home/node/.config/mmpm
+    restart: unless-stopped

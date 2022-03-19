@@ -1,0 +1,25 @@
+
+span{
+    color:#cc5979;
+}
+input {-webkit-appearance: none;
+    color: white;
+    outline: none;
+    border: white solid 2px;
+    background: #cc5979;
+    height: 10px;
+    width: 600px;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+input::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    background: #cc5979;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border:white solid 2px;
+}
+
+
+  

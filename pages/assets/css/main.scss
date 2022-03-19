@@ -1,0 +1,42 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+@charset "utf-8";
+
+$primary-color: #bdbdbd;
+$link-color: #353635;
+
+$sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+
+// beide sidebars schmaler (default 300px)
+$right-sidebar-width: 250px;
+
+@import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
+@import "minimal-mistakes"; // main partials
+
+// code background
+p > code, a > code, li > code, figcaption > code, td > code {
+  background: #f0efef;
+}
+
+// Menü inverse Farben
+.masthead, .greedy-nav, .greedy-nav a, .greedy-nav a:hover {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+// Schrift im Overlay Image von weiss auf grau
+.page__hero--overlay .page__title, .page__hero--overlay .page__meta, .page__hero--overlay .comment__date, .page__hero--overlay .page__lead, .page__hero--overlay .btn, .page__hero--overlay #goog-wm-sb {
+  color: #e7e7e7;
+}
+
+// Schrift im Overlay-Bild
+.page__title {
+  margin-left: 250px;
+}
+
+// sidebar  font-size kleiner
+.nav__list .nav__items {
+  font-size: 1rem;
+}

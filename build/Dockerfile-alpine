@@ -1,0 +1,38 @@
+ARG BUILDER_IMG
+ARG NODE_VERSION
+FROM ${BUILDER_IMG} as builder
+FROM node:${NODE_VERSION}-alpine
+LABEL maintainer="Karsten Hassel"
+
+USER root
+
+WORKDIR /opt/magic_mirror
+
+COPY --from=builder --chown=node:node /opt/magic_mirror /opt/magic_mirror
+# copy startscripts into container:
+COPY --chown=node:node *.sh /opt/magic_mirror/
+
+# only amd64, for pi you need more packages: 
+# apk add --no-cache git gtk+3.0 libx11-dev nss-dev nano procps arp-scan sudo; \
+# sudo bug
+ARG GIT_INFO
+RUN set -e; \
+    echo "http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories; \
+    apk add --no-cache git nano sudo gettext tzdata tini; \
+    echo "node ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers; \
+    echo "Set disable_coredump false" > /etc/sudo.conf; \
+    chown -R node:node /home/node/; \
+    chown -R node:node .; \
+    chmod +x *.sh; \
+    ./build_info.sh "Runtime" "$GIT_INFO"; \
+    rm -f build_info.sh;
+
+USER node
+
+ENV NODE_ENV=production \
+    MM_OVERRIDE_DEFAULT_MODULES=true \
+    MM_OVERRIDE_CSS=true
+
+EXPOSE 8080
+
+ENTRYPOINT ["/sbin/tini", "--", "./entrypoint.sh"]
