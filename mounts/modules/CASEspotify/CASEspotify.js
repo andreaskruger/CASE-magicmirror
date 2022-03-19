@@ -6,7 +6,7 @@ Module.register("CASEspotify", {
 		text: "Hello World!"
 
 	},
-	musicMessage:"Spotify",
+	musicMessage:"Spotify!",
 	start: function(){
 		const ws = new WebSocket("ws://192.168.1.124:8081/events")
 		ws.addEventListener("message",(message)=>{
